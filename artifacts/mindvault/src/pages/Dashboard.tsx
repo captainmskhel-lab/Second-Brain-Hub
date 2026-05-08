@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Search, Square, Send, X, Lightbulb, BookOpen, Headphones, StickyNote } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Mic, Square, Send, X, Lightbulb, BookOpen, Headphones, StickyNote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useInbox, CaptureType } from "@/context/InboxContext";
 import { useToast } from "@/hooks/use-toast";
+import { SmartSearch } from "@/components/SmartSearch";
 
 const recentResources = [
   { title: "GERD", category: "Penyakit Dalam", updated: "2 hari lalu", desc: "Gangguan asam lambung kronis yang mempengaruhi kualitas hidup." },
@@ -145,14 +145,7 @@ export default function Dashboard() {
     >
       {/* Search + Capture */}
       <div className="flex flex-col items-center space-y-6 pt-10">
-        <div className="relative w-full max-w-2xl">
-          <Search className="absolute left-4 top-3.5 h-5 w-5 text-muted-foreground" />
-          <Input
-            className="w-full pl-12 h-12 bg-card border-border rounded-full text-base focus-visible:ring-primary shadow-lg"
-            placeholder="Cari pengetahuan, catatan, atau proyek..."
-            data-testid="input-search"
-          />
-        </div>
+        <SmartSearch />
 
         {/* Quick Capture Panel */}
         <div className="w-full max-w-2xl space-y-3">

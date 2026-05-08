@@ -1,0 +1,125 @@
+Improve the existing MindVault app by adding a powerful Smart Search system.
+
+IMPORTANT:
+- Do NOT rebuild the app.
+- Keep the existing UI and layout.
+- Maintain the dark cinematic aesthetic.
+- Preserve PARA terminology in English.
+- Keep the interface mostly in Indonesian.
+
+==================================================
+GOAL
+==================================================
+
+The search system should become one of the core experiences of MindVault.
+
+Users should be able to instantly search:
+- Knowledge Cards
+- Resources
+- Projects
+- Related Topics
+- Notes
+- Tags
+
+The experience should feel:
+- fast
+- smooth
+- intelligent
+- immersive
+
+==================================================
+GLOBAL SEARCH BAR
+==================================================
+
+Upgrade the existing search bar on Dashboard.
+
+Requirements:
+- real-time search
+- modern animations
+- glowing focus effect
+- responsive design
+
+Placeholder:
+"Cari pengetahuan, catatan, project, atau topik..."
+
+==================================================
+SEARCH RESULTS
+==================================================
+
+When user types:
+- show live search results dropdown
+
+Search results should include:
+- icon
+- title
+- category
+- type label
+
+Example result types:
+- Knowledge Card
+- Project
+- Resource
+- Related Topic
+- Inbox Item
+
+==================================================
+SEARCH EXPERIENCE
+==================================================
+
+When user clicks a result:
+- open the related page/card/modal automatically
+
+==================================================
+SEARCH FILTERS
+==================================================
+
+Add simple filter chips:
+- Semua
+- Knowledge
+- Projects
+- Resources
+- Inbox
+
+==================================================
+SMART MATCHING
+==================================================
+
+Search should match:
+- titles
+- tags
+- related topics
+- summaries
+- linked notes
+
+==================================================
+VISUAL STYLE
+==================================================
+
+Maintain:
+- dark cinematic aesthetic
+- elegant glow effects
+- clean spacing
+- modern dropdown cards
+- smooth hover animations
+
+The search experience should feel:
+- premium
+- modern
+- intelligent
+- fast
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT:
+- add backend
+- add AI chatbot
+- add database
+- add Google Drive integration yet
+
+Focus ONLY on:
+- Smart Search
+- Search UI
+- Search interaction
+- Search experience
