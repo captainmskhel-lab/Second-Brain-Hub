@@ -1,0 +1,101 @@
+Improve the existing MindVault app by adding Google Drive resource linking for Knowledge Cards.
+
+IMPORTANT:
+- Do NOT rebuild the app.
+- Keep the existing layout and design.
+- Maintain the dark cinematic aesthetic.
+- Preserve PARA terminology in English.
+- Keep the interface mostly in Indonesian.
+
+==================================================
+GOAL
+==================================================
+
+MindVault should NOT upload or store PDF files directly.
+
+Instead, Knowledge Cards should connect to external Google Drive PDF resources.
+
+The app should feel like:
+- a personal knowledge portal
+- an intelligent learning system
+- a connected medical vault
+
+==================================================
+GOOGLE DRIVE LINKING
+==================================================
+
+Inside each Knowledge Card detail view:
+
+Replace the current upload system with:
+- Google Drive link attachment system
+
+Users should be able to:
+- paste a Google Drive PDF link
+- save the link to the Knowledge Card
+- open the PDF directly
+
+==================================================
+PDF SECTION
+==================================================
+
+Create a modern PDF Resource section.
+
+Requirements:
+- elegant card layout
+- PDF icon
+- file title
+- Google Drive indicator
+- Open PDF button
+
+If no PDF exists:
+show elegant placeholder state.
+
+==================================================
+PDF OPEN EXPERIENCE
+==================================================
+
+When user clicks:
+"Buka PDF"
+
+The Google Drive PDF should:
+- open in new tab
+OR
+- open in modal preview
+
+==================================================
+RESOURCE EXPERIENCE
+==================================================
+
+The PDF system should feel:
+- clean
+- minimal
+- lightweight
+- professional
+- integrated naturally into the knowledge workflow
+
+==================================================
+VISUAL STYLE
+==================================================
+
+Maintain:
+- dark cinematic aesthetic
+- premium UI
+- clean spacing
+- elegant hover animations
+- modern resource cards
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT:
+- upload real files to Replit
+- add backend
+- add cloud storage
+- add authentication
+- add AI chatbot
+
+Only create:
+- Google Drive linking flow
+- PDF resource UI
+- resource attachment experience

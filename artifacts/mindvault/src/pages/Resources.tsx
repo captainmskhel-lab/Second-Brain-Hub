@@ -1,8 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus, FileText, X, Stethoscope, Brain, Zap, Pill, Target, Music,
-  Tag, Clock, BookOpen, Link2, ChevronRight, Layers
+  Tag, Clock, BookOpen, Link2, ChevronRight, Layers, ExternalLink,
+  HardDrive, Trash2, Check, AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,22 +22,27 @@ interface KnowledgeCard {
   linkedNotes: string[];
 }
 
+interface DriveLink {
+  url: string;
+  title: string;
+  addedAt: string;
+}
+
 interface Category {
   id: string;
   label: string;
   icon: typeof Stethoscope;
   color: string;
-  glow: string;
 }
 
 const categories: Category[] = [
-  { id: "all", label: "Semua", icon: Layers, color: "text-foreground", glow: "rgba(255,255,255,0.1)" },
-  { id: "internal", label: "Internal Medicine", icon: Stethoscope, color: "text-blue-400", glow: "rgba(96,165,250,0.15)" },
-  { id: "psychiatry", label: "Psychiatry", icon: Brain, color: "text-purple-400", glow: "rgba(192,132,252,0.15)" },
-  { id: "emergency", label: "Emergency", icon: Zap, color: "text-red-400", glow: "rgba(248,113,113,0.15)" },
-  { id: "pharmacology", label: "Pharmacology", icon: Pill, color: "text-emerald-400", glow: "rgba(52,211,153,0.15)" },
-  { id: "productivity", label: "Productivity", icon: Target, color: "text-amber-400", glow: "rgba(251,191,36,0.15)" },
-  { id: "music", label: "Music & Worship", icon: Music, color: "text-pink-400", glow: "rgba(244,114,182,0.15)" },
+  { id: "all", label: "Semua", icon: Layers, color: "text-foreground" },
+  { id: "internal", label: "Internal Medicine", icon: Stethoscope, color: "text-blue-400" },
+  { id: "psychiatry", label: "Psychiatry", icon: Brain, color: "text-purple-400" },
+  { id: "emergency", label: "Emergency", icon: Zap, color: "text-red-400" },
+  { id: "pharmacology", label: "Pharmacology", icon: Pill, color: "text-emerald-400" },
+  { id: "productivity", label: "Productivity", icon: Target, color: "text-amber-400" },
+  { id: "music", label: "Music & Worship", icon: Music, color: "text-pink-400" },
 ];
 
 const allCards: KnowledgeCard[] = [
@@ -222,9 +228,48 @@ const allCards: KnowledgeCard[] = [
   },
 ];
 
+const DRIVE_LINKS_KEY = "mindvault_drive_links";
+
+function useDriveLinks() {
+  const [driveLinks, setDriveLinks] = useState<Record<string, DriveLink>>(() => {
+    try {
+      const stored = localStorage.getItem(DRIVE_LINKS_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(DRIVE_LINKS_KEY, JSON.stringify(driveLinks));
+  }, [driveLinks]);
+
+  function saveLink(cardId: string, url: string, title: string) {
+    setDriveLinks((prev) => ({
+      ...prev,
+      [cardId]: { url, title, addedAt: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) },
+    }));
+  }
+
+  function removeLink(cardId: string) {
+    setDriveLinks((prev) => {
+      const next = { ...prev };
+      delete next[cardId];
+      return next;
+    });
+  }
+
+  return { driveLinks, saveLink, removeLink };
+}
+
+function isValidDriveUrl(url: string): boolean {
+  return url.includes("drive.google.com") || url.includes("docs.google.com");
+}
+
 export default function ResourcesPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedCard, setSelectedCard] = useState<KnowledgeCard | null>(null);
+  const { driveLinks, saveLink, removeLink } = useDriveLinks();
 
   const filtered = activeCategory === "all"
     ? allCards
@@ -280,7 +325,7 @@ export default function ResourcesPage() {
         })}
       </div>
 
-      {/* Section heading */}
+      {/* Section heading + grid */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeCategory}
@@ -297,7 +342,6 @@ export default function ResourcesPage() {
             </span>
           </div>
 
-          {/* Knowledge Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {filtered.map((card, i) => (
               <KnowledgeCardItem
@@ -305,6 +349,7 @@ export default function ResourcesPage() {
                 card={card}
                 index={i}
                 categories={categories}
+                driveLink={driveLinks[card.id]}
                 onClick={() => setSelectedCard(card)}
               />
             ))}
@@ -312,12 +357,15 @@ export default function ResourcesPage() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Knowledge Detail Modal */}
+      {/* Knowledge Detail Panel */}
       <AnimatePresence>
         {selectedCard && (
           <KnowledgeDetailView
             card={selectedCard}
             categories={categories}
+            driveLink={driveLinks[selectedCard.id]}
+            onSaveLink={(url, title) => saveLink(selectedCard.id, url, title)}
+            onRemoveLink={() => removeLink(selectedCard.id)}
             onClose={() => setSelectedCard(null)}
           />
         )}
@@ -330,15 +378,24 @@ function KnowledgeCardItem({
   card,
   index,
   categories,
+  driveLink,
   onClick,
 }: {
   card: KnowledgeCard;
   index: number;
   categories: Category[];
+  driveLink?: DriveLink;
   onClick: () => void;
 }) {
   const cat = categories.find((c) => c.id === card.category);
   const Icon = cat?.icon ?? Stethoscope;
+
+  function handlePdfClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (driveLink) {
+      window.open(driveLink.url, "_blank", "noopener,noreferrer");
+    }
+  }
 
   return (
     <motion.div
@@ -350,11 +407,9 @@ function KnowledgeCardItem({
       data-testid={`card-resource-${card.id}`}
       className="group cursor-pointer rounded-2xl border border-border bg-card/70 backdrop-blur-sm hover:border-border/80 hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 flex flex-col overflow-hidden"
     >
-      {/* Card top accent bar */}
-      <div className={cn("h-0.5 w-full opacity-0 group-hover:opacity-100 transition-opacity", `bg-gradient-to-r from-transparent via-current to-transparent`, cat?.color)} />
+      <div className={cn("h-0.5 w-full opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-transparent via-current to-transparent", cat?.color)} />
 
       <div className="p-5 flex flex-col flex-1 space-y-4">
-        {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center bg-muted/60", cat?.color)}>
@@ -365,7 +420,6 @@ function KnowledgeCardItem({
           <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary/60 transition-all group-hover:translate-x-0.5 shrink-0 mt-0.5" />
         </div>
 
-        {/* Tags */}
         <div className="flex flex-wrap gap-1.5">
           {card.tags.map((tag) => (
             <span key={tag} className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground">
@@ -375,10 +429,8 @@ function KnowledgeCardItem({
           ))}
         </div>
 
-        {/* Summary */}
         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-1">{card.summary}</p>
 
-        {/* Highlights */}
         <div className="space-y-1.5">
           {card.highlights.slice(0, 2).map((h, i) => (
             <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground/80">
@@ -388,20 +440,26 @@ function KnowledgeCardItem({
           ))}
         </div>
 
-        {/* Footer */}
         <div className="pt-3 border-t border-border/40 flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
             <Clock className="h-3 w-3" />
             {card.updated}
           </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); }}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
-            data-testid={`button-pdf-${card.id}`}
-          >
-            <FileText className="h-3 w-3" />
-            Buka PDF
-          </button>
+          {driveLink ? (
+            <button
+              onClick={handlePdfClick}
+              className="flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+              data-testid={`button-open-drive-${card.id}`}
+            >
+              <HardDrive className="h-3 w-3" />
+              Buka PDF
+            </button>
+          ) : (
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground/40">
+              <FileText className="h-3 w-3" />
+              Belum ada PDF
+            </span>
+          )}
         </div>
       </div>
     </motion.div>
@@ -411,18 +469,51 @@ function KnowledgeCardItem({
 function KnowledgeDetailView({
   card,
   categories,
+  driveLink,
+  onSaveLink,
+  onRemoveLink,
   onClose,
 }: {
   card: KnowledgeCard;
   categories: Category[];
+  driveLink?: DriveLink;
+  onSaveLink: (url: string, title: string) => void;
+  onRemoveLink: () => void;
   onClose: () => void;
 }) {
   const cat = categories.find((c) => c.id === card.category);
   const Icon = cat?.icon ?? Stethoscope;
 
+  const [linkInput, setLinkInput] = useState("");
+  const [titleInput, setTitleInput] = useState("");
+  const [showLinkForm, setShowLinkForm] = useState(false);
+  const [urlError, setUrlError] = useState(false);
+
+  function handleSave() {
+    if (!isValidDriveUrl(linkInput)) {
+      setUrlError(true);
+      return;
+    }
+    onSaveLink(linkInput.trim(), titleInput.trim() || card.title + " — PDF");
+    setLinkInput("");
+    setTitleInput("");
+    setShowLinkForm(false);
+    setUrlError(false);
+  }
+
+  function handleCancel() {
+    setLinkInput("");
+    setTitleInput("");
+    setShowLinkForm(false);
+    setUrlError(false);
+  }
+
+  function openPdf() {
+    if (driveLink) window.open(driveLink.url, "_blank", "noopener,noreferrer");
+  }
+
   return (
     <>
-      {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -431,20 +522,19 @@ function KnowledgeDetailView({
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
       />
 
-      {/* Slide-in panel */}
       <motion.div
         initial={{ x: "100%", opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: "100%", opacity: 0 }}
         transition={{ type: "spring", stiffness: 280, damping: 30 }}
-        className="fixed right-0 top-0 h-full w-full max-w-xl bg-background border-l border-border z-50 flex flex-col shadow-[−24px_0_60px_rgba(0,0,0,0.5)]"
+        className="fixed right-0 top-0 h-full w-full max-w-xl bg-background border-l border-border z-50 flex flex-col"
         data-testid="knowledge-detail-panel"
       >
-        {/* Panel header */}
+        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-border/60 bg-card/50">
           <div className="flex items-center gap-3">
             <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center bg-muted", cat?.color)}>
-              <Icon className="h-4.5 w-4.5 h-[18px] w-[18px]" />
+              <Icon className="h-[18px] w-[18px]" />
             </div>
             <div>
               <h2 className="font-semibold text-lg">{card.title}</h2>
@@ -460,7 +550,7 @@ function KnowledgeDetailView({
           </button>
         </div>
 
-        {/* Panel content */}
+        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
           {/* Tags */}
           <div className="flex flex-wrap gap-2">
@@ -477,11 +567,9 @@ function KnowledgeDetailView({
           </div>
 
           {/* Summary */}
-          <div>
-            <p className="text-base text-muted-foreground leading-relaxed">{card.summary}</p>
-          </div>
+          <p className="text-base text-muted-foreground leading-relaxed">{card.summary}</p>
 
-          {/* High-yield notes */}
+          {/* High-Yield Notes */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-primary" />
@@ -503,7 +591,7 @@ function KnowledgeDetailView({
             </div>
           </section>
 
-          {/* Key learning points */}
+          {/* Key Points */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -527,7 +615,7 @@ function KnowledgeDetailView({
             </div>
           </section>
 
-          {/* Related topics */}
+          {/* Related Topics */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <Link2 className="h-4 w-4 text-muted-foreground" />
@@ -547,7 +635,7 @@ function KnowledgeDetailView({
             </div>
           </section>
 
-          {/* Linked notes */}
+          {/* Linked Notes */}
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-muted-foreground" />
@@ -564,33 +652,213 @@ function KnowledgeDetailView({
             </div>
           </section>
 
-          {/* PDF preview placeholder */}
+          {/* Google Drive PDF Section */}
           <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Dokumen PDF</h3>
-            </div>
-            <div className="rounded-xl border border-border/50 bg-muted/20 p-8 flex flex-col items-center justify-center gap-3 text-center">
-              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                <FileText className="h-6 w-6 text-muted-foreground/50" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <HardDrive className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Dokumen PDF</h3>
               </div>
-              <p className="text-sm text-muted-foreground">Belum ada PDF yang diunggah</p>
-              <Button variant="outline" size="sm" className="border-border hover:border-primary hover:text-primary">
-                Unggah PDF
-              </Button>
+              {driveLink && !showLinkForm && (
+                <button
+                  onClick={() => setShowLinkForm(true)}
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                  data-testid="button-change-link"
+                >
+                  Ganti link
+                </button>
+              )}
             </div>
+
+            <AnimatePresence mode="wait">
+              {/* Linked state */}
+              {driveLink && !showLinkForm && (
+                <motion.div
+                  key="linked"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-3"
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Drive icon */}
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-border/60 flex items-center justify-center shrink-0">
+                      <svg viewBox="0 0 87.3 78" className="h-5 w-5" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6.6 66.85L21.9 42.5H87.3L72.1 66.85Z" fill="#0066DA"/>
+                        <path d="M43.65 0L6.6 66.85H37.2L74.2 0Z" fill="#00AC47"/>
+                        <path d="M43.65 0L21.9 42.5H52.5L74.2 0Z" fill="#EA4335"/>
+                        <path d="M21.9 42.5L6.6 66.85H37.2L52.5 42.5Z" fill="#00832D"/>
+                        <path d="M52.5 42.5H21.9L37.2 66.85H72.1L52.5 42.5Z" fill="#2684FC"/>
+                        <path d="M74.2 0H43.65L52.5 42.5H87.3L74.2 0Z" fill="#FFBA00"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-foreground truncate">{driveLink.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Google Drive · Ditambahkan {driveLink.addedAt}</p>
+                      <p className="text-xs text-muted-foreground/50 truncate mt-1">{driveLink.url}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <Button
+                      size="sm"
+                      onClick={openPdf}
+                      className="flex-1 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/20 gap-2 h-8"
+                      data-testid="button-open-drive-pdf"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Buka di Google Drive
+                    </Button>
+                    <button
+                      onClick={onRemoveLink}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/50 text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-all"
+                      data-testid="button-remove-drive-link"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Empty / form state */}
+              {(!driveLink || showLinkForm) && (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {!showLinkForm ? (
+                    <div className="rounded-2xl border border-border/50 bg-muted/10 p-6 flex flex-col items-center gap-4 text-center">
+                      <div className="w-12 h-12 rounded-xl bg-muted/60 border border-border/40 flex items-center justify-center">
+                        <HardDrive className="h-5 w-5 text-muted-foreground/50" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Belum ada PDF terhubung</p>
+                        <p className="text-xs text-muted-foreground/50 mt-1">Tautkan file dari Google Drive</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowLinkForm(true)}
+                        className="border-border hover:border-primary hover:text-primary gap-2"
+                        data-testid="button-attach-drive"
+                      >
+                        <Link2 className="h-3.5 w-3.5" />
+                        Tautkan Google Drive
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-border bg-card/60 p-5 space-y-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg viewBox="0 0 87.3 78" className="h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M6.6 66.85L21.9 42.5H87.3L72.1 66.85Z" fill="#0066DA"/>
+                          <path d="M43.65 0L6.6 66.85H37.2L74.2 0Z" fill="#00AC47"/>
+                          <path d="M43.65 0L21.9 42.5H52.5L74.2 0Z" fill="#EA4335"/>
+                          <path d="M21.9 42.5L6.6 66.85H37.2L52.5 42.5Z" fill="#00832D"/>
+                          <path d="M52.5 42.5H21.9L37.2 66.85H72.1L52.5 42.5Z" fill="#2684FC"/>
+                          <path d="M74.2 0H43.65L52.5 42.5H87.3L74.2 0Z" fill="#FFBA00"/>
+                        </svg>
+                        <p className="text-sm font-medium">Tautkan Google Drive PDF</p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1.5 block">Nama file (opsional)</label>
+                          <input
+                            value={titleInput}
+                            onChange={(e) => setTitleInput(e.target.value)}
+                            placeholder={`${card.title} — PDF`}
+                            className="w-full bg-muted/40 border border-border/60 rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-all"
+                            data-testid="input-drive-title"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground mb-1.5 block">Link Google Drive</label>
+                          <input
+                            value={linkInput}
+                            onChange={(e) => { setLinkInput(e.target.value); setUrlError(false); }}
+                            placeholder="https://drive.google.com/file/d/..."
+                            className={cn(
+                              "w-full bg-muted/40 border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all",
+                              urlError
+                                ? "border-destructive/60 focus:ring-1 focus:ring-destructive/20"
+                                : "border-border/60 focus:border-primary/60 focus:ring-1 focus:ring-primary/20"
+                            )}
+                            data-testid="input-drive-url"
+                          />
+                          <AnimatePresence>
+                            {urlError && (
+                              <motion.p
+                                initial={{ opacity: 0, y: -4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                className="flex items-center gap-1.5 text-xs text-destructive mt-1.5"
+                              >
+                                <AlertCircle className="h-3 w-3" />
+                                Masukkan link Google Drive yang valid
+                              </motion.p>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-muted-foreground/50 leading-relaxed">
+                        Pastikan file Google Drive dapat diakses. Buka Drive → klik kanan file → "Bagikan" → "Siapa saja yang memiliki link".
+                      </p>
+
+                      <div className="flex gap-2 pt-1">
+                        <Button
+                          size="sm"
+                          onClick={handleSave}
+                          disabled={!linkInput.trim()}
+                          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-9 disabled:opacity-30"
+                          data-testid="button-save-drive-link"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                          Simpan Tautan
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleCancel}
+                          className="text-muted-foreground hover:text-foreground h-9"
+                          data-testid="button-cancel-drive-link"
+                        >
+                          Batal
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </section>
         </div>
 
-        {/* Panel footer */}
+        {/* Footer */}
         <div className="px-6 py-4 border-t border-border/60 bg-card/30 flex gap-3">
-          <Button
-            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_12px_rgba(249,168,37,0.2)]"
-            data-testid="button-open-pdf-detail"
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            Buka PDF
-          </Button>
+          {driveLink ? (
+            <Button
+              onClick={openPdf}
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-[0_0_12px_rgba(249,168,37,0.2)]"
+              data-testid="button-open-pdf-detail"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Buka PDF
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => setShowLinkForm(true)}
+              className="flex-1 border-border hover:border-primary hover:text-primary gap-2"
+              data-testid="button-attach-drive-footer"
+            >
+              <HardDrive className="h-4 w-4" />
+              Tautkan Google Drive
+            </Button>
+          )}
           <Button variant="outline" onClick={onClose} className="border-border hover:border-border/80">
             Tutup
           </Button>
