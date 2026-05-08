@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
 import NotFound from "@/pages/not-found";
 
+import { InboxProvider } from "@/context/InboxContext";
 import { Sidebar } from "@/components/layout/Sidebar";
 import Dashboard from "@/pages/Dashboard";
 import Inbox from "@/pages/Inbox";
@@ -35,15 +36,17 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <div className="flex min-h-screen w-full bg-background selection:bg-primary/30">
-            <Sidebar />
-            <main className="flex-1 md:pl-64 min-h-[100dvh]">
-              <Router />
-            </main>
-          </div>
-        </WouterRouter>
-        <Toaster />
+        <InboxProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <div className="flex min-h-screen w-full bg-background selection:bg-primary/30">
+              <Sidebar />
+              <main className="flex-1 md:pl-64 min-h-[100dvh]">
+                <Router />
+              </main>
+            </div>
+          </WouterRouter>
+          <Toaster />
+        </InboxProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

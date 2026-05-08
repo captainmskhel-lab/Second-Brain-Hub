@@ -8,9 +8,9 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Kotak Masuk", href: "/inbox", icon: Inbox },
-  { label: "Proyek", href: "/projects", icon: FolderKanban },
-  { label: "Sumber Daya", href: "/resources", icon: Library },
-  { label: "Arsip", href: "/archive", icon: Archive },
+  { label: "Projects", href: "/projects", icon: FolderKanban },
+  { label: "Resources", href: "/resources", icon: Library },
+  { label: "Archive", href: "/archive", icon: Archive },
 ];
 
 export function Sidebar() {

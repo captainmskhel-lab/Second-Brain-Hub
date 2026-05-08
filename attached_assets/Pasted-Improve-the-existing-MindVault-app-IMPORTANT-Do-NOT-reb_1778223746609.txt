@@ -1,0 +1,122 @@
+Improve the existing MindVault app.
+
+IMPORTANT:
+- Do NOT rebuild the app from scratch.
+- Keep the existing layout and dark cinematic aesthetic.
+- Keep the app language mostly Indonesian.
+- However, preserve PARA terminology in English because it is a system name.
+
+==================================================
+PARA STRUCTURE FIX
+==================================================
+
+Replace the current navigation labels:
+
+- "Proyek" → "Projects"
+- "Sumber Daya" → "Resources"
+- "Arsip" → "Archive"
+
+Keep:
+- Dashboard
+- Kotak Masuk
+
+Do NOT translate PARA terminology into Indonesian.
+
+==================================================
+QUICK CAPTURE SYSTEM
+==================================================
+
+Upgrade the Quick Capture section on Dashboard.
+
+The Quick Capture feature should become the core experience of the app.
+
+Users should be able to:
+- quickly type thoughts
+- record voice notes
+- instantly save captures into Inbox
+
+==================================================
+VOICE CAPTURE
+==================================================
+
+Add a real voice recording feature.
+
+Requirements:
+- microphone button
+- recording animation
+- active recording state
+- recording timer
+- stop recording button
+
+After recording:
+- automatically convert speech into text
+- place the text into the capture field
+
+==================================================
+CAPTURE FLOW
+==================================================
+
+Add:
+- Save button
+- Clear button
+
+When user saves:
+- automatically send the item into Inbox
+
+==================================================
+INBOX IMPROVEMENT
+==================================================
+
+Improve Inbox cards slightly.
+
+Inbox items should include:
+- icon
+- timestamp
+- capture type
+
+Capture types:
+- Voice Capture
+- Idea
+- Reflection
+- Quick Note
+
+Add quick action buttons:
+- Move to Projects
+- Move to Resources
+- Archive
+
+==================================================
+VISUAL IMPROVEMENTS
+==================================================
+
+Refine the UI slightly:
+- improve spacing
+- improve hover effects
+- improve glow effects
+- improve card consistency
+- maintain cinematic dark aesthetic
+
+The app should feel:
+- modern
+- calming
+- immersive
+- elegant
+- intelligent
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT:
+- add AI chatbot
+- add backend
+- add login system
+- add Google Drive integration yet
+- redesign unrelated pages
+
+Focus only on:
+- PARA terminology fix
+- Quick Capture
+- Voice Capture
+- Inbox workflow
+- UI refinement
