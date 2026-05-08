@@ -1,0 +1,137 @@
+Improve the Resources section of the existing MindVault app.
+
+IMPORTANT:
+- Do NOT rebuild the app.
+- Keep the existing design and layout.
+- Maintain the dark cinematic aesthetic.
+- Keep the interface mostly in Indonesian.
+- Preserve PARA terminology in English.
+
+==================================================
+GOAL
+==================================================
+
+Transform the Resources section into a real knowledge library system.
+
+The Resources page should feel:
+- intelligent
+- organized
+- immersive
+- calming
+- modern
+
+This is NOT a normal file manager.
+
+It should feel like:
+- a medical knowledge vault
+- a personal learning library
+- a second-brain knowledge system
+
+==================================================
+RESOURCE CATEGORIES
+==================================================
+
+Create modern category sections for:
+
+- Internal Medicine
+- Psychiatry
+- Emergency
+- Pharmacology
+- Productivity
+- Music & Worship
+
+Each category should:
+- display modern cards
+- include icons
+- have smooth hover effects
+- feel clean and elegant
+
+==================================================
+KNOWLEDGE CARDS
+==================================================
+
+Inside each category, create Knowledge Cards.
+
+Example cards:
+- GERD
+- Epilepsi
+- Syok
+- Pneumonia
+- Depresi
+- Hipertensi
+
+Each Knowledge Card should include:
+- title
+- tags
+- short summary
+- last updated
+- related topics
+- open PDF button
+
+==================================================
+KNOWLEDGE CARD EXPERIENCE
+==================================================
+
+When a card is clicked:
+- open a detailed Knowledge View page or modal
+
+The detailed view should include:
+- high-yield notes
+- distilled learning points
+- related topics
+- linked notes
+- PDF preview placeholder
+- clean reading layout
+
+The layout should feel:
+- immersive
+- distraction-free
+- optimized for studying
+
+==================================================
+SMART LINKING
+==================================================
+
+Add a simple “Related Topics” section inside Knowledge Cards.
+
+Example:
+GERD related to:
+- Dyspepsia
+- PPI
+- GI Bleeding
+
+These can be static for now.
+
+==================================================
+VISUAL STYLE
+==================================================
+
+Improve:
+- spacing
+- readability
+- card consistency
+- hover animations
+- section hierarchy
+
+The app should feel like:
+- a premium personal knowledge system
+- modern medical learning workspace
+- cinematic second brain
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT:
+- add backend
+- add authentication
+- add AI chatbot
+- add Google Drive integration yet
+- add database logic yet
+
+Focus ONLY on:
+- Resources UI
+- Knowledge Cards
+- Knowledge detail view
+- Related topics
+- Better study experience
