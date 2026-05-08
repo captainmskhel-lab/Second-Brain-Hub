@@ -1,0 +1,109 @@
+Improve the existing MindVault app by adding real local data persistence using browser localStorage.
+
+IMPORTANT:
+- Do NOT rebuild the app.
+- Keep all existing UI and features.
+- Maintain the dark cinematic aesthetic.
+- Preserve PARA terminology in English.
+- Keep the interface mostly in Indonesian.
+
+==================================================
+GOAL
+==================================================
+
+MindVault should become a usable personal knowledge system.
+
+User data should persist even after:
+- page refresh
+- browser reload
+- reopening the app
+
+==================================================
+LOCAL STORAGE SYSTEM
+==================================================
+
+Use browser localStorage to persist data.
+
+Persist the following:
+- Inbox items
+- Projects
+- Resources
+- Knowledge Cards
+- Google Drive PDF links
+- Quick Captures
+- Related notes
+
+==================================================
+QUICK CAPTURE PERSISTENCE
+==================================================
+
+When user creates:
+- text captures
+- voice captures
+
+Automatically save them into localStorage.
+
+==================================================
+INBOX PERSISTENCE
+==================================================
+
+Inbox items should:
+- remain after refresh
+- preserve timestamps
+- preserve capture types
+
+==================================================
+RESOURCE PERSISTENCE
+==================================================
+
+Knowledge Cards should persist:
+- title
+- tags
+- summaries
+- related topics
+- PDF links
+
+==================================================
+PROJECTS PERSISTENCE
+==================================================
+
+Projects should remain saved after refresh.
+
+==================================================
+USER EXPERIENCE
+==================================================
+
+The persistence system should feel:
+- automatic
+- seamless
+- invisible
+- smooth
+
+Users should never need to manually save.
+
+==================================================
+PERFORMANCE
+==================================================
+
+Keep the app:
+- lightweight
+- fast
+- responsive
+
+Avoid unnecessary heavy logic.
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT:
+- add backend
+- add cloud database
+- add authentication
+- add server storage
+- redesign the app
+
+Only add:
+- localStorage persistence
+- save/load logic
+- smooth persistence workflow

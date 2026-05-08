@@ -2,7 +2,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { RotateCcw, File, FolderArchive, Library, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+
+interface ArchiveItem {
+  id: string;
+  title: string;
+  time: string;
+  type: "catatan" | "proyek" | "sumber";
+}
 
 const typeConfig = {
   catatan: { icon: File, color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20", label: "Catatan" },
@@ -10,14 +17,14 @@ const typeConfig = {
   sumber: { icon: Library, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", label: "Resource" },
 } as const;
 
-const defaultItems = [
-  { id: "a1", title: "Catatan lama 1", time: "2 bulan lalu", type: "catatan" as const },
-  { id: "a2", title: "Ujian Blok 12", time: "1 bulan lalu", type: "proyek" as const },
-  { id: "a3", title: "Anatomi Dasar", time: "3 minggu lalu", type: "sumber" as const },
+const defaultItems: ArchiveItem[] = [
+  { id: "a1", title: "Catatan lama 1", time: "2 bulan lalu", type: "catatan" },
+  { id: "a2", title: "Ujian Blok 12", time: "1 bulan lalu", type: "proyek" },
+  { id: "a3", title: "Anatomi Dasar", time: "3 minggu lalu", type: "sumber" },
 ];
 
 export default function ArchivePage() {
-  const [items, setItems] = useState(defaultItems);
+  const [items, setItems] = useLocalStorage<ArchiveItem[]>("mindvault_archive", defaultItems);
 
   function restore(id: string) {
     setItems((prev) => prev.filter((i) => i.id !== id));
@@ -74,23 +81,25 @@ export default function ArchivePage() {
                 className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm px-5 py-4 hover:border-border hover:bg-card/80 transition-all"
                 data-testid={`card-archive-${item.id}`}
               >
-                {/* Icon */}
-                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${config.bg} ${config.color}`}>
+                <div
+                  className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${config.bg} ${config.color}`}
+                >
                   <Icon className="w-4 h-4" />
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-medium text-foreground/80 truncate">{item.title}</h3>
-                    <Badge variant="outline" className={`${config.bg} ${config.color} border text-xs font-normal shrink-0`}>
+                    <Badge
+                      variant="outline"
+                      className={`${config.bg} ${config.color} border text-xs font-normal shrink-0`}
+                    >
                       {config.label}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">Diarsipkan {item.time}</p>
                 </div>
 
-                {/* Restore */}
                 <Button
                   variant="outline"
                   size="sm"

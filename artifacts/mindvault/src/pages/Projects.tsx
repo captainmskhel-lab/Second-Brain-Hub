@@ -1,11 +1,24 @@
 import { motion } from "framer-motion";
-import { Plus, FolderKanban, FileText, ChevronRight } from "lucide-react";
+import { Plus, FolderKanban, FileText, ChevronRight, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
-const projects = [
+interface Project {
+  id: string;
+  title: string;
+  notes: number;
+  status: string;
+  progress: number;
+  description: string;
+  color: string;
+  bg: string;
+}
+
+const defaultProjects: Project[] = [
   {
+    id: "p1",
     title: "Internship Survival",
     notes: 8,
     status: "aktif",
@@ -15,6 +28,7 @@ const projects = [
     bg: "bg-blue-500/8 border-blue-500/15",
   },
   {
+    id: "p2",
     title: "UKMPPD Preparation",
     notes: 23,
     status: "aktif",
@@ -24,6 +38,7 @@ const projects = [
     bg: "bg-amber-500/8 border-amber-500/15",
   },
   {
+    id: "p3",
     title: "Serimpi Depmus Hub",
     notes: 5,
     status: "aktif",
@@ -33,6 +48,7 @@ const projects = [
     bg: "bg-purple-500/8 border-purple-500/15",
   },
   {
+    id: "p4",
     title: "Belajar Farmakologi",
     notes: 12,
     status: "aktif",
@@ -43,12 +59,39 @@ const projects = [
   },
 ];
 
+const colorOptions = [
+  { color: "text-blue-400", bg: "bg-blue-500/8 border-blue-500/15" },
+  { color: "text-amber-400", bg: "bg-amber-500/8 border-amber-500/15" },
+  { color: "text-purple-400", bg: "bg-purple-500/8 border-purple-500/15" },
+  { color: "text-emerald-400", bg: "bg-emerald-500/8 border-emerald-500/15" },
+  { color: "text-pink-400", bg: "bg-pink-500/8 border-pink-500/15" },
+  { color: "text-cyan-400", bg: "bg-cyan-500/8 border-cyan-500/15" },
+];
+
 export default function ProjectsPage() {
+  const [projects, setProjects] = useLocalStorage<Project[]>("mindvault_projects", defaultProjects);
   const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 80);
     return () => clearTimeout(t);
   }, []);
+
+  function updateProgress(id: string, delta: number) {
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? { ...p, progress: Math.max(0, Math.min(100, p.progress + delta)) }
+          : p
+      )
+    );
+  }
+
+  function addNote(id: string) {
+    setProjects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, notes: p.notes + 1 } : p))
+    );
+  }
 
   return (
     <motion.div
@@ -72,14 +115,22 @@ export default function ProjectsPage() {
         </Button>
       </div>
 
-      {/* Summary row */}
+      {/* Summary stats */}
       <div className="flex gap-4 flex-wrap">
         {[
           { label: "Aktif", value: projects.length },
           { label: "Total Catatan", value: projects.reduce((a, p) => a + p.notes, 0) },
-          { label: "Rata-rata Progres", value: Math.round(projects.reduce((a, p) => a + p.progress, 0) / projects.length) + "%" },
+          {
+            label: "Rata-rata Progres",
+            value: projects.length
+              ? Math.round(projects.reduce((a, p) => a + p.progress, 0) / projects.length) + "%"
+              : "0%",
+          },
         ].map((stat) => (
-          <div key={stat.label} className="flex-1 min-w-[100px] rounded-2xl border border-border/60 bg-card/60 px-4 py-3">
+          <div
+            key={stat.label}
+            className="flex-1 min-w-[100px] rounded-2xl border border-border/60 bg-card/60 px-4 py-3"
+          >
             <p className="text-2xl font-semibold text-foreground">{stat.value}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
           </div>
@@ -90,26 +141,30 @@ export default function ProjectsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {projects.map((proj, i) => (
           <motion.div
-            key={i}
+            key={proj.id}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07, duration: 0.35 }}
-            whileHover={{ y: -4 }}
-            className="group cursor-pointer rounded-2xl border border-border bg-card/70 backdrop-blur-sm hover:border-border/80 hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)] transition-all duration-300 overflow-hidden"
-            data-testid={`card-project-${i}`}
+            whileHover={{ y: -3 }}
+            className="group rounded-2xl border border-border bg-card/70 backdrop-blur-sm hover:border-border/80 hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)] transition-all duration-300 overflow-hidden"
+            data-testid={`card-project-${proj.id}`}
           >
             {/* Top accent */}
-            <div className={`h-0.5 w-full opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-transparent via-current to-transparent ${proj.color}`} />
+            <div
+              className={`h-0.5 w-full opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-transparent via-current to-transparent ${proj.color}`}
+            />
 
             <div className="p-5 space-y-4">
               {/* Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl border flex items-center justify-center ${proj.bg} ${proj.color}`}>
+                  <div
+                    className={`w-9 h-9 rounded-xl border flex items-center justify-center ${proj.bg} ${proj.color}`}
+                  >
                     <FolderKanban className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className={`font-semibold text-base transition-colors group-hover:${proj.color}`}>{proj.title}</h3>
+                    <h3 className="font-semibold text-base">{proj.title}</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">{proj.notes} catatan</p>
                   </div>
                 </div>
@@ -124,25 +179,56 @@ export default function ProjectsPage() {
               {/* Description */}
               <p className="text-sm text-muted-foreground leading-relaxed">{proj.description}</p>
 
-              {/* Notes indicator */}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground/60">
-                <FileText className="h-3 w-3" />
-                <span>{proj.notes} catatan tersimpan</span>
+              {/* Notes count with add */}
+              <div className="flex items-center justify-between text-xs text-muted-foreground/60">
+                <div className="flex items-center gap-1.5">
+                  <FileText className="h-3 w-3" />
+                  <span>{proj.notes} catatan tersimpan</span>
+                </div>
+                <button
+                  onClick={() => addNote(proj.id)}
+                  className="flex items-center gap-1 text-muted-foreground/50 hover:text-primary transition-colors"
+                  data-testid={`button-add-note-${proj.id}`}
+                >
+                  <Plus className="h-3 w-3" />
+                  tambah
+                </button>
               </div>
 
-              {/* Progress */}
-              <div className="space-y-1.5 pt-1">
+              {/* Progress with controls */}
+              <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Progres</span>
-                  <span className={`font-semibold ${proj.color}`}>{proj.progress}%</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => updateProgress(proj.id, -5)}
+                      className="w-5 h-5 flex items-center justify-center rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+                      data-testid={`button-progress-down-${proj.id}`}
+                    >
+                      <Minus className="h-2.5 w-2.5" />
+                    </button>
+                    <span className={`font-semibold tabular-nums w-8 text-center ${proj.color}`}>
+                      {proj.progress}%
+                    </span>
+                    <button
+                      onClick={() => updateProgress(proj.id, 5)}
+                      className="w-5 h-5 flex items-center justify-center rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-all"
+                      data-testid={`button-progress-up-${proj.id}`}
+                    >
+                      <Plus className="h-2.5 w-2.5" />
+                    </button>
+                  </div>
                 </div>
                 <div className="w-full bg-muted/60 rounded-full h-1.5 overflow-hidden">
                   <motion.div
-                    className={`h-full rounded-full bg-gradient-to-r from-current to-current ${proj.color}`}
-                    style={{ boxShadow: `0 0 8px currentColor` }}
+                    className={`h-full rounded-full ${proj.color}`}
+                    style={{
+                      background: `currentColor`,
+                      filter: "brightness(1.1)",
+                    }}
                     initial={{ width: 0 }}
                     animate={{ width: mounted ? `${proj.progress}%` : 0 }}
-                    transition={{ duration: 1, delay: 0.2 + i * 0.1, ease: [0.34, 1.56, 0.64, 1] }}
+                    transition={{ duration: 0.8, delay: 0.15 + i * 0.08, ease: [0.34, 1.56, 0.64, 1] }}
                   />
                 </div>
               </div>
