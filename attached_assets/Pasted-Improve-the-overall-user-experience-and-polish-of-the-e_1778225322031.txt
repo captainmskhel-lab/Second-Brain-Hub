@@ -1,0 +1,160 @@
+Improve the overall user experience and polish of the existing MindVault app.
+
+IMPORTANT:
+- Do NOT rebuild the app.
+- Keep all existing functionality.
+- Maintain the dark cinematic aesthetic.
+- Preserve PARA terminology in English.
+- Keep the interface mostly in Indonesian.
+
+==================================================
+GOAL
+==================================================
+
+Transform MindVault from a prototype into a polished premium personal knowledge system.
+
+The app should feel:
+- immersive
+- elegant
+- calming
+- modern
+- smooth
+- intelligently designed
+
+==================================================
+GLOBAL UI POLISH
+==================================================
+
+Improve:
+- spacing consistency
+- typography hierarchy
+- hover animations
+- transitions
+- visual balance
+- glow effects
+- shadows
+- rounded corners
+- card consistency
+
+Make the UI feel:
+- premium
+- clean
+- cinematic
+- distraction-free
+
+==================================================
+SIDEBAR IMPROVEMENTS
+==================================================
+
+Improve sidebar experience:
+- smoother hover states
+- active page highlight
+- subtle animations
+- better spacing
+- cleaner icons
+
+Add:
+- collapse sidebar button
+- smooth sidebar transition on mobile
+
+==================================================
+MOBILE EXPERIENCE
+==================================================
+
+Optimize the entire app for mobile-first experience.
+
+Improve:
+- responsive layouts
+- card stacking
+- sidebar behavior
+- spacing on smaller screens
+- touch-friendly buttons
+- one-hand usability
+
+The app should feel excellent on iPhone.
+
+==================================================
+KNOWLEDGE VIEW IMPROVEMENTS
+==================================================
+
+Improve Knowledge Card detail view.
+
+Enhance:
+- readability
+- section hierarchy
+- related topics layout
+- PDF section
+- note spacing
+
+The reading experience should feel:
+- immersive
+- calm
+- focused
+- premium
+
+==================================================
+SEARCH EXPERIENCE POLISH
+==================================================
+
+Improve search interactions:
+- smoother dropdown animation
+- highlighted search matches
+- cleaner result cards
+- better spacing
+- responsive search UI
+
+==================================================
+INBOX EXPERIENCE POLISH
+==================================================
+
+Improve Inbox usability:
+- better card hierarchy
+- subtle hover effects
+- cleaner timestamps
+- improved action buttons
+
+==================================================
+MICRO INTERACTIONS
+==================================================
+
+Add subtle animations for:
+- button clicks
+- hover states
+- modal opening
+- page transitions
+- search interactions
+
+Animations should remain:
+- smooth
+- subtle
+- elegant
+
+==================================================
+PERFORMANCE
+==================================================
+
+Keep the app:
+- lightweight
+- responsive
+- smooth
+- optimized
+
+Avoid heavy unnecessary effects.
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT:
+- add backend
+- add AI chatbot
+- add authentication
+- add cloud storage
+- redesign the app structure
+
+Focus ONLY on:
+- premium polish
+- UX refinement
+- responsiveness
+- cinematic feel
+- usability improvements
