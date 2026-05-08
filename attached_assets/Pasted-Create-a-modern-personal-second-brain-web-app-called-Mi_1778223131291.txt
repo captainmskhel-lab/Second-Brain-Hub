@@ -1,0 +1,209 @@
+Create a modern personal second-brain web app called “MindVault”.
+
+IMPORTANT:
+- The entire interface language must be in Indonesian.
+- The app is private and designed for personal use only.
+- The atmosphere should feel calm, intelligent, modern, cinematic, and minimal.
+
+==================================================
+GENERAL CONCEPT
+==================================================
+
+This app is a personal knowledge and thinking system inspired by PARA method.
+
+The app should NOT feel like:
+- corporate productivity software
+- business dashboard
+- complicated workspace
+
+Instead, it should feel like:
+- a digital mind sanctuary
+- a calm second brain
+- a personal knowledge vault
+
+==================================================
+VISUAL STYLE
+==================================================
+
+Design style:
+- dark mode elegant
+- cinematic minimal
+- calm and immersive
+- soft glow lighting
+- glassmorphism light effects
+- modern rounded cards
+- smooth transitions
+
+Color palette:
+- dark charcoal background
+- warm amber/gold accents
+- soft white text
+- muted gray secondary elements
+
+Use modern clean typography.
+
+==================================================
+APP STRUCTURE
+==================================================
+
+Create the following navigation sections:
+- Dashboard
+- Inbox
+- Projects
+- Resources
+- Archive
+
+Use a modern sidebar navigation.
+
+==================================================
+DASHBOARD PAGE
+==================================================
+
+Create a beautiful homepage dashboard.
+
+The dashboard should include:
+
+1. Large global search bar at the top
+
+Placeholder:
+"Cari pengetahuan, catatan, atau project..."
+
+2. Large Quick Capture button
+
+Text:
+"Capture Thought"
+
+Include:
+- glowing button effect
+- microphone icon
+- modern rounded design
+
+3. Recent Resources section
+
+Display modern knowledge cards.
+
+Example cards:
+- GERD
+- Epilepsi
+- Syok
+- Pneumonia
+
+Each card should include:
+- title
+- category
+- last updated
+- short description
+
+4. Recent Projects section
+
+Example:
+- Internship Survival
+- Serimpi Depmus Hub
+- Belajar Farmakologi
+
+5. Simple timeline section
+
+Show:
+- recently added notes
+- recent captures
+- latest updates
+
+==================================================
+INBOX PAGE
+==================================================
+
+Create an Inbox page for raw thoughts and captures.
+
+This page should feel clean and simple.
+
+Example inbox items:
+- ide random
+- voice notes
+- insight dosen
+- reflections
+- saved links
+
+Each inbox item should have:
+- title
+- timestamp
+- type icon
+
+Add action buttons:
+- Move to Project
+- Move to Resource
+- Archive
+
+==================================================
+PROJECTS PAGE
+==================================================
+
+Create a clean Projects page.
+
+Display projects using modern cards.
+
+Example:
+- Internship
+- UKMPPD Preparation
+- Serimpi Depmus Hub
+
+==================================================
+RESOURCES PAGE
+==================================================
+
+Create a Resources library page.
+
+Use category-based organization.
+
+Example categories:
+- Internal Medicine
+- Psychiatry
+- Emergency
+- Pharmacology
+- Productivity
+- Music & Worship
+
+Inside categories, display “Knowledge Cards”.
+
+Each knowledge card should include:
+- title
+- tags
+- short summary
+- open PDF button
+- related topics
+
+==================================================
+ARCHIVE PAGE
+==================================================
+
+Create a simple archive page for inactive items.
+
+==================================================
+MOBILE EXPERIENCE
+==================================================
+
+The app must be:
+- fully responsive
+- mobile friendly
+- smooth on iPhone
+- optimized for quick access
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT add:
+- AI chatbot
+- authentication
+- backend logic
+- Google Drive integration
+- voice processing
+
+For now focus ONLY on:
+- UI
+- layout
+- structure
+- navigation
+- modern aesthetic
+- smooth user experience
+
+Create the app foundation first.
