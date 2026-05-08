@@ -1,32 +1,21 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Square, Send, X, Lightbulb, BookOpen, Headphones, StickyNote } from "lucide-react";
+import { Mic, Square, Send, X, Lightbulb, BookOpen, Headphones, StickyNote, FolderKanban, Inbox, Library, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useInbox, CaptureType } from "@/context/InboxContext";
 import { useToast } from "@/hooks/use-toast";
 import { SmartSearch } from "@/components/SmartSearch";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
-const recentResources = [
-  { title: "GERD", category: "Penyakit Dalam", updated: "2 hari lalu", desc: "Gangguan asam lambung kronis yang mempengaruhi kualitas hidup." },
-  { title: "Epilepsi", category: "Neurologi", updated: "3 hari lalu", desc: "Gangguan otak yang menyebabkan kejang berulang." },
-  { title: "Syok", category: "Gawat Darurat", updated: "5 hari lalu", desc: "Kondisi kritis penurunan perfusi organ sistemik." },
-  { title: "Pneumonia", category: "Pulmonologi", updated: "1 minggu lalu", desc: "Infeksi parenkim paru yang memerlukan penanganan segera." },
-];
-
-const activeProjects = [
-  { title: "Internship Survival", notes: 8, progress: 60 },
-  { title: "Serimpi Depmus Hub", notes: 5, progress: 30 },
-  { title: "Belajar Farmakologi", notes: 12, progress: 45 },
-];
-
-const activities = [
-  { type: "Catatan", text: "ide random untuk sidang", time: "2 jam lalu" },
-  { type: "Resource ditambah", text: "Epilepsi", time: "kemarin" },
-  { type: "Project diperbarui", text: "Internship Survival", time: "3 hari lalu" },
-];
+interface Project {
+  id: string;
+  title: string;
+  notes: number;
+  progress: number;
+  color: string;
+}
 
 const captureTypes: { label: string; value: CaptureType; icon: typeof Lightbulb }[] = [
   { label: "Ide", value: "Idea", icon: Lightbulb },
@@ -44,14 +33,17 @@ export default function Dashboard() {
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { addItem } = useInbox();
+  const { addItem, items: inboxItems } = useInbox();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
+  const [projects] = useLocalStorage<Project[]>("mindvault_projects", []);
+
+  const totalItems = inboxItems.length + projects.length;
+  const isEmpty = totalItems === 0;
+
   useEffect(() => {
-    return () => {
-      stopRecording();
-    };
+    return () => stopRecording();
   }, []);
 
   function openCapture() {
@@ -72,7 +64,9 @@ export default function Dashboard() {
   }
 
   function startVoiceCapture() {
-    const SpeechRecognition = window.SpeechRecognition || (window as unknown as { webkitSpeechRecognition: typeof SpeechRecognition }).webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition: typeof SpeechRecognition }).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       toast({ title: "Browser tidak mendukung voice capture", variant: "destructive" });
       return;
@@ -107,10 +101,6 @@ export default function Dashboard() {
     }, 1000);
   }
 
-  function handleStopRecording() {
-    stopRecording();
-  }
-
   function handleSave() {
     const trimmed = captureText.trim();
     if (!trimmed) return;
@@ -141,7 +131,7 @@ export default function Dashboard() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="p-6 md:p-10 max-w-5xl mx-auto space-y-10"
+      className="p-6 md:p-10 max-w-5xl mx-auto space-y-12"
     >
       {/* Search + Capture */}
       <div className="flex flex-col items-center space-y-6 pt-10">
@@ -158,7 +148,6 @@ export default function Dashboard() {
                 transition={{ duration: 0.2 }}
                 className="rounded-2xl border border-border bg-card/80 backdrop-blur-md p-5 space-y-4 shadow-[0_0_30px_rgba(249,168,37,0.08)]"
               >
-                {/* Capture type selector */}
                 <div className="flex gap-2 flex-wrap">
                   {captureTypes.map((ct) => (
                     <button
@@ -177,18 +166,14 @@ export default function Dashboard() {
                   ))}
                 </div>
 
-                {/* Text area */}
                 <Textarea
                   value={captureText}
                   onChange={(e) => setCaptureText(e.target.value)}
-                  placeholder={
-                    isRecording ? "Mendengarkan..." : "Tulis pikiran kamu di sini..."
-                  }
+                  placeholder={isRecording ? "Mendengarkan..." : "Tulis pikiran kamu di sini..."}
                   className="min-h-[100px] resize-none bg-muted/30 border-border/50 focus-visible:ring-primary text-base rounded-xl"
                   data-testid="textarea-capture"
                 />
 
-                {/* Recording indicator */}
                 <AnimatePresence>
                   {isRecording && (
                     <motion.div
@@ -202,15 +187,12 @@ export default function Dashboard() {
                         transition={{ repeat: Infinity, duration: 1 }}
                         className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"
                       />
-                      <span className="text-sm text-muted-foreground font-mono">
-                        {formatTime(recordingSeconds)}
-                      </span>
+                      <span className="text-sm text-muted-foreground font-mono">{formatTime(recordingSeconds)}</span>
                       <span className="text-xs text-muted-foreground">Sedang merekam...</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Action row */}
                 <div className="flex items-center justify-between gap-2 pt-1">
                   <div className="flex gap-2">
                     {!isRecording ? (
@@ -228,7 +210,7 @@ export default function Dashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={handleStopRecording}
+                        onClick={stopRecording}
                         className="border-red-500/50 text-red-400 hover:bg-red-500/10 gap-2"
                         data-testid="button-stop-recording"
                       >
@@ -262,7 +244,6 @@ export default function Dashboard() {
             )}
           </AnimatePresence>
 
-          {/* Main capture button */}
           {!captureOpen && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -292,92 +273,132 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Resources */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-medium tracking-tight">Sumber Daya Terbaru</h2>
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x scrollbar-none">
-          {recentResources.map((res, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ y: -4 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <Card
-                data-testid={`card-resource-${i}`}
-                className="min-w-[280px] snap-start bg-card/60 backdrop-blur-sm border-border hover:border-primary/30 hover:shadow-[0_0_20px_rgba(249,168,37,0.08)] transition-all cursor-pointer"
-              >
-                <CardContent className="p-5 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <h3 className="font-semibold">{res.title}</h3>
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{res.category}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{res.desc}</p>
-                  <p className="text-xs text-muted-foreground/50 pt-1">Diperbarui {res.updated}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Projects + Activity */}
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          <h2 className="text-xl font-medium tracking-tight">Projects Aktif</h2>
-          <div className="space-y-3">
-            {activeProjects.map((proj, i) => (
-              <motion.div key={i} whileHover={{ x: 4 }} transition={{ type: "spring", stiffness: 300 }}>
-                <Card
-                  data-testid={`card-project-${i}`}
-                  className="bg-card/60 backdrop-blur-sm border-border hover:border-primary/30 transition-all cursor-pointer"
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div>
-                        <h3 className="font-medium text-sm">{proj.title}</h3>
-                        <p className="text-xs text-muted-foreground">{proj.notes} catatan</p>
-                      </div>
-                      <span className="text-sm font-semibold text-primary">{proj.progress}%</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                      <motion.div
-                        className="h-full bg-primary rounded-full shadow-[0_0_6px_rgba(249,168,37,0.5)]"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${proj.progress}%` }}
-                        transition={{ duration: 0.8, delay: i * 0.1, ease: "easeOut" }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+      {/* Empty — first time welcome */}
+      {isEmpty && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="flex flex-col items-center text-center space-y-5 py-10"
+        >
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full bg-primary/8 border border-primary/15 flex items-center justify-center shadow-[0_0_30px_rgba(249,168,37,0.12)]">
+              <Sparkles className="w-9 h-9 text-primary/60" />
+            </div>
+            <div className="absolute -inset-3 rounded-full border border-primary/5 animate-pulse" />
           </div>
-        </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold tracking-tight">Selamat datang di MindVault</h2>
+            <p className="text-muted-foreground max-w-md leading-relaxed">
+              Ruang pikir pribadimu dimulai dari sini. Tangkap ide pertamamu, atau buat project dan resource untuk mulai membangun second brain-mu.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3 justify-center pt-2">
+            <button
+              onClick={openCapture}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/60 bg-card/60 text-sm text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-card transition-all"
+              data-testid="button-welcome-capture"
+            >
+              <Inbox className="h-4 w-4 text-purple-400" />
+              Tangkap ide pertama
+            </button>
+            <button
+              onClick={() => setLocation("/projects")}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/60 bg-card/60 text-sm text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-card transition-all"
+              data-testid="button-welcome-projects"
+            >
+              <FolderKanban className="h-4 w-4 text-blue-400" />
+              Buat project pertama
+            </button>
+            <button
+              onClick={() => setLocation("/resources")}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border/60 bg-card/60 text-sm text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-card transition-all"
+              data-testid="button-welcome-resources"
+            >
+              <Library className="h-4 w-4 text-emerald-400" />
+              Tambah knowledge card
+            </button>
+          </div>
+        </motion.div>
+      )}
 
+      {/* Active projects — only when data exists */}
+      {projects.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-medium tracking-tight">Aktivitas Terbaru</h2>
-          <div className="space-y-5">
-            {activities.map((act, i) => (
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-medium tracking-tight">Projects Aktif</h2>
+            <button
+              onClick={() => setLocation("/projects")}
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              Lihat semua
+            </button>
+          </div>
+          <div className="space-y-3">
+            {projects.slice(0, 3).map((proj, i) => (
               <motion.div
-                key={i}
+                key={proj.id}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className="flex items-start gap-4"
+                whileHover={{ x: 4 }}
+                onClick={() => setLocation("/projects")}
+                className="flex items-center gap-4 rounded-2xl border border-border/60 bg-card/60 px-5 py-4 hover:border-border hover:bg-card/80 transition-all cursor-pointer group"
+                data-testid={`dashboard-project-${proj.id}`}
               >
-                <div className="mt-1.5 w-2 h-2 rounded-full bg-primary/70 ring-2 ring-primary/20 shrink-0" />
-                <div>
-                  <p className="text-sm">
-                    <span className="text-muted-foreground mr-1.5">{act.type}:</span>
-                    <span className="font-medium">{act.text}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground/60 mt-0.5">{act.time}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium text-sm truncate">{proj.title}</h3>
+                    <span className="text-sm font-semibold text-primary shrink-0 ml-3">{proj.progress}%</span>
+                  </div>
+                  <div className="w-full bg-muted/60 rounded-full h-1.5 overflow-hidden">
+                    <motion.div
+                      className="h-full bg-primary rounded-full shadow-[0_0_6px_rgba(249,168,37,0.5)]"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${proj.progress}%` }}
+                      transition={{ duration: 0.8, delay: i * 0.1, ease: "easeOut" }}
+                    />
+                  </div>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Recent inbox — only when data exists */}
+      {inboxItems.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-medium tracking-tight">Capture Terbaru</h2>
+            <button
+              onClick={() => setLocation("/inbox")}
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              Lihat semua
+            </button>
+          </div>
+          <div className="space-y-2">
+            {inboxItems.slice(0, 4).map((item, i) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.06 }}
+                onClick={() => setLocation("/inbox")}
+                className="flex items-start gap-3 rounded-xl border border-border/40 bg-card/40 px-4 py-3 hover:bg-card/60 hover:border-border/60 transition-all cursor-pointer"
+                data-testid={`dashboard-inbox-${item.id}`}
+              >
+                <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm truncate">{item.text}</p>
+                  <p className="text-xs text-muted-foreground/60 mt-0.5">{item.time} · {item.type}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

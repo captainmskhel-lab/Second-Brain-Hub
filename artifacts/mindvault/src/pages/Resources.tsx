@@ -3,11 +3,12 @@ import { useState, useEffect } from "react";
 import {
   Plus, FileText, X, Stethoscope, Brain, Zap, Pill, Target, Music,
   Tag, Clock, BookOpen, Link2, ChevronRight, Layers, ExternalLink,
-  HardDrive, Trash2, Check, AlertCircle
+  HardDrive, Trash2, Check, AlertCircle, Library
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 interface KnowledgeCard {
   id: string;
@@ -45,189 +46,6 @@ const categories: Category[] = [
   { id: "music", label: "Music & Worship", icon: Music, color: "text-pink-400" },
 ];
 
-const allCards: KnowledgeCard[] = [
-  {
-    id: "gerd",
-    title: "GERD",
-    category: "internal",
-    tags: ["asam lambung", "dispepsia", "GI"],
-    summary: "Gangguan refluks gastroesofageal kronis akibat lemahnya lower esophageal sphincter menyebabkan iritasi mukosa esofagus.",
-    updated: "2 hari lalu",
-    related: ["Dyspepsia", "PPI", "GI Bleeding", "Ulkus Peptikum"],
-    highlights: ["Heartburn adalah gejala khas", "LES tone turun = reflux naik", "PPI adalah terapi utama"],
-    keyPoints: [
-      "Patofisiologi: disfungsi LES → paparan asam kronik",
-      "Gejala: heartburn, regurgitasi, disfagia",
-      "Komplikasi: esofagitis, Barrett's esophagus, adenokarsinoma",
-      "Terapi: PPI 8 minggu, modifikasi gaya hidup",
-      "Red flags: disfagia progresif, BB turun, hematemesis",
-    ],
-    linkedNotes: ["Dyspepsia - Workup", "PPI Farmakologi", "Barrett Esophagus"],
-  },
-  {
-    id: "epilepsi",
-    title: "Epilepsi",
-    category: "internal",
-    tags: ["kejang", "neurologi", "antikonvulsan"],
-    summary: "Gangguan otak kronik ditandai kejang berulang akibat aktivitas listrik abnormal neuron.",
-    updated: "3 hari lalu",
-    related: ["Status Epileptikus", "Febrile Seizure", "EEG"],
-    highlights: ["Minimal 2 kejang unprovoked", "EEG bukan satu-satunya diagnosis", "Hindari pencetus"],
-    keyPoints: [
-      "Definisi: ≥2 kejang unprovoked berjarak >24 jam",
-      "Klasifikasi: fokal, umum, unknown onset",
-      "First line: valproate (umum), karbamazepin (fokal)",
-      "Status epileptikus: benzodiazepin IV segera",
-      "Edukasi: jangan berenang sendirian, jaga tidur cukup",
-    ],
-    linkedNotes: ["Status Epileptikus", "Farmakologi Antikonvulsan"],
-  },
-  {
-    id: "hipertensi",
-    title: "Hipertensi",
-    category: "internal",
-    tags: ["kardiovaskular", "kronis", "lifestyle"],
-    summary: "Peningkatan tekanan darah persisten ≥140/90 mmHg yang meningkatkan risiko kardiovaskular dan ginjal.",
-    updated: "5 hari lalu",
-    related: ["Gagal Jantung", "CKD", "Stroke", "ACE Inhibitor"],
-    highlights: ["Silent killer — sering asimtomatik", "Target <130/80 pada berisiko tinggi", "Modifikasi gaya hidup adalah terapi pertama"],
-    keyPoints: [
-      "Diagnosis: rerata ≥2 kali pengukuran berbeda",
-      "Stage 1: 130–139/80–89 mmHg, Stage 2: ≥140/90",
-      "First line: ACEI/ARB, CCB, thiazide",
-      "Hipertensi urgensi vs emergensi berdasarkan kerusakan organ",
-      "Komplikasi: HF, stroke, retinopati, nefropati",
-    ],
-    linkedNotes: ["ACE Inhibitor - Farmakologi", "CKD & Hipertensi"],
-  },
-  {
-    id: "depresi",
-    title: "Depresi Mayor",
-    category: "psychiatry",
-    tags: ["mood", "antidepresan", "psikiatri"],
-    summary: "Gangguan mood ditandai afek depresif persisten ≥2 minggu disertai anhedonia dan gejala neurovegetatif.",
-    updated: "1 minggu lalu",
-    related: ["Bipolar Disorder", "SSRI", "CBT", "Suicidality"],
-    highlights: ["SIG E CAPS mnemonic untuk diagnosis", "SSRI adalah first line farmakologi", "CBT sama efektifnya dengan obat"],
-    keyPoints: [
-      "Kriteria DSM-5: ≥5 gejala selama 2 minggu (harus ada afek depresif/anhedonia)",
-      "SIG E CAPS: Sleep, Interest, Guilt, Energy, Concentration, Appetite, Psychomotor, Suicidal",
-      "Terapi: SSRI (fluoxetin, sertralin) + psikoterapi",
-      "Onset efek antidepresan: 2–4 minggu",
-      "Selalu nilai risiko bunuh diri",
-    ],
-    linkedNotes: ["SSRI Farmakologi", "CBT Principles", "Risk Assessment Suicidal"],
-  },
-  {
-    id: "skizofrenia",
-    title: "Skizofrenia",
-    category: "psychiatry",
-    tags: ["psikosis", "antipsikotik", "kronik"],
-    summary: "Gangguan psikotik kronik dengan gejala positif (halusinasi, waham), negatif, dan disorganisasi berlangsung ≥6 bulan.",
-    updated: "2 minggu lalu",
-    related: ["Antipsikotik", "EPS", "Clozapine", "Psikosis Akut"],
-    highlights: ["Gejala positif lebih responsif terhadap obat", "Antipsikotik tipikal vs atipikal", "Compliance adalah tantangan utama"],
-    keyPoints: [
-      "Kriteria A: ≥2 dari 5 gejala selama 1 bulan",
-      "Gejala positif: halusinasi, waham, bicara kacau",
-      "Gejala negatif: afek datar, alogia, avolisi",
-      "First line: antipsikotik atipikal (risperidone, olanzapine)",
-      "Clozapine: refrakter, pantau agranulositosis",
-    ],
-    linkedNotes: ["Antipsikotik Atipikal", "EPS & Tardive Dyskinesia"],
-  },
-  {
-    id: "syok",
-    title: "Syok",
-    category: "emergency",
-    tags: ["emergensi", "kritis", "hemodinamik"],
-    summary: "Kondisi mengancam jiwa akibat ketidakseimbangan suplai dan kebutuhan oksigen jaringan yang menyebabkan disfungsi organ.",
-    updated: "4 hari lalu",
-    related: ["Sepsis", "Fluid Resuscitation", "Vasopressor", "ABCDE"],
-    highlights: ["4 tipe: distributif, hipovolemik, kardiogenik, obstruktif", "Distributif paling sering (sepsis)", "Mean arterial pressure target ≥65"],
-    keyPoints: [
-      "Distributif: sepsis, anafilaksis — vasodilatasi masif",
-      "Hipovolemik: perdarahan, dehidrasi — volume rendah",
-      "Kardiogenik: pump failure — dobutamin",
-      "Obstruktif: tamponade, tension pneumotoraks",
-      "Prinsip: ABCDE, 2 IV large bore, fluid challenge 500 mL kristaloid",
-    ],
-    linkedNotes: ["Sepsis - Management", "Vasopressor Guide", "ABCDE Assessment"],
-  },
-  {
-    id: "pneumonia",
-    title: "Pneumonia",
-    category: "emergency",
-    tags: ["paru", "infeksi", "antibiotik"],
-    summary: "Infeksi parenkim paru yang menyebabkan konsolidasi dan gangguan pertukaran gas, dapat mengancam jiwa bila berat.",
-    updated: "6 hari lalu",
-    related: ["CAP vs HAP", "PSI Score", "CURB-65", "Antibiotik"],
-    highlights: ["CURB-65 untuk stratifikasi risiko", "CAP: amoksisilin + makrolid", "Kultur dahak sebelum antibiotik"],
-    keyPoints: [
-      "CAP vs HAP: <48 jam vs ≥48 jam rawat inap",
-      "CURB-65: Confusion, Urea, RR, BP, Age ≥65",
-      "Skor 0–1: rawat jalan, 2: rawat inap, ≥3: ICU",
-      "CAP ringan: amoksisilin. Berat: beta-laktam + makrolid/FQ",
-      "Komplikasi: empyema, abses paru, ARDS",
-    ],
-    linkedNotes: ["CURB-65 Calculator", "CAP Antibiotik Guide"],
-  },
-  {
-    id: "ppi",
-    title: "Proton Pump Inhibitor",
-    category: "pharmacology",
-    tags: ["PPI", "GI", "antasid"],
-    summary: "Penghambat pompa proton yang menekan sekresi asam lambung secara ireversibel, digunakan pada GERD, ulkus, dan H. pylori.",
-    updated: "1 minggu lalu",
-    related: ["GERD", "H. pylori", "NSAIDs", "Omeprazole"],
-    highlights: ["Dosis sebelum makan untuk efek optimal", "Taper sebelum stop jangka panjang", "Risiko: hipomagnesemia, infeksi C. diff"],
-    keyPoints: [
-      "Mekanisme: inhibisi H+/K+ ATPase ireversibel",
-      "Contoh: omeprazole, pantoprazole, lansoprazole",
-      "Onset: 1–4 hari, efek penuh 4 hari",
-      "Indikasi: GERD, ulkus peptikum, H. pylori eradikasi",
-      "ES jangka panjang: fraktur tulang, defisiensi B12, Mg",
-    ],
-    linkedNotes: ["GERD Management", "H. pylori Triple Therapy"],
-  },
-  {
-    id: "gtd",
-    title: "Metode GTD",
-    category: "productivity",
-    tags: ["sistem", "produktivitas", "workflow"],
-    summary: "Getting Things Done — sistem produktivitas David Allen untuk mengelola komitmen, tugas, dan proyek dengan pikiran yang jernih.",
-    updated: "3 minggu lalu",
-    related: ["PARA Method", "Inbox Zero", "Weekly Review"],
-    highlights: ["Capture everything out of your head", "Weekly review adalah kunci sistem", "2-minute rule: langsung kerjakan jika <2 menit"],
-    keyPoints: [
-      "5 langkah: Capture, Clarify, Organize, Reflect, Engage",
-      "Inbox = semua input masuk, harus diproses rutin",
-      "Next actions harus spesifik dan actionable",
-      "Weekly Review: bersihkan inbox, perbarui daftar proyek",
-      "Konteks-based lists: @phone, @komputer, @kampus",
-    ],
-    linkedNotes: ["PARA Method", "Weekly Review Template"],
-  },
-  {
-    id: "kidung",
-    title: "Penyembahan — Worship Leading",
-    category: "music",
-    tags: ["worship", "pemimpin pujian", "rohani"],
-    summary: "Prinsip dan praktik memimpin jemaat dalam penyembahan yang tulus, berfokus pada kehadiran Tuhan bukan penampilan.",
-    updated: "1 bulan lalu",
-    related: ["Teologi Penyembahan", "Vokal", "Flow Lagu"],
-    highlights: ["Pemimpin penyembahan adalah fasilitator, bukan bintang", "Flow lagu: dari gembira → intim", "Doa sebelum memimpin adalah fondasi"],
-    keyPoints: [
-      "Tujuan: membawa jemaat masuk hadirat Tuhan",
-      "Pilih lagu dengan alur dinamika dan teologi yang kuat",
-      "Komunikasi dengan tim musik: transisi, signal, tempo",
-      "Jangan takut keheningan — beri ruang Roh Kudus bergerak",
-      "Evaluasi pasca ibadah: apa yang berhasil, apa yang bisa diperbaiki",
-    ],
-    linkedNotes: ["Flow Penyembahan", "Daftar Lagu Favorit"],
-  },
-];
-
 const DRIVE_LINKS_KEY = "mindvault_drive_links";
 
 function useDriveLinks() {
@@ -247,7 +65,11 @@ function useDriveLinks() {
   function saveLink(cardId: string, url: string, title: string) {
     setDriveLinks((prev) => ({
       ...prev,
-      [cardId]: { url, title, addedAt: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) },
+      [cardId]: {
+        url,
+        title,
+        addedAt: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }),
+      },
     }));
   }
 
@@ -270,10 +92,10 @@ export default function ResourcesPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedCard, setSelectedCard] = useState<KnowledgeCard | null>(null);
   const { driveLinks, saveLink, removeLink } = useDriveLinks();
+  const [cards] = useLocalStorage<KnowledgeCard[]>("mindvault_cards", []);
 
-  const filtered = activeCategory === "all"
-    ? allCards
-    : allCards.filter((c) => c.category === activeCategory);
+  const filtered =
+    activeCategory === "all" ? cards : cards.filter((c) => c.category === activeCategory);
 
   const activeCat = categories.find((c) => c.id === activeCategory)!;
 
@@ -325,7 +147,7 @@ export default function ResourcesPage() {
         })}
       </div>
 
-      {/* Section heading + grid */}
+      {/* Section heading */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeCategory}
@@ -342,18 +164,50 @@ export default function ResourcesPage() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {filtered.map((card, i) => (
-              <KnowledgeCardItem
-                key={card.id}
-                card={card}
-                index={i}
-                categories={categories}
-                driveLink={driveLinks[card.id]}
-                onClick={() => setSelectedCard(card)}
-              />
-            ))}
-          </div>
+          {/* Empty state */}
+          {filtered.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col items-center justify-center py-24 space-y-5 text-center"
+            >
+              <div className="relative">
+                <div className="w-16 h-16 rounded-2xl bg-primary/6 border border-primary/12 flex items-center justify-center shadow-[0_0_24px_rgba(249,168,37,0.08)]">
+                  <Library className="w-7 h-7 text-muted-foreground/60" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-base font-medium">Belum ada Knowledge Card</p>
+                <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+                  Tambahkan pengetahuan pertamamu dan bangun perpustakaan pribadimu.
+                </p>
+              </div>
+              <Button
+                className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-[0_0_16px_rgba(249,168,37,0.2)]"
+                data-testid="button-add-first-resource"
+              >
+                <Plus className="h-4 w-4" />
+                Tambah Sumber Pertama
+              </Button>
+            </motion.div>
+          )}
+
+          {/* Cards grid */}
+          {filtered.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {filtered.map((card, i) => (
+                <KnowledgeCardItem
+                  key={card.id}
+                  card={card}
+                  index={i}
+                  categories={categories}
+                  driveLink={driveLinks[card.id]}
+                  onClick={() => setSelectedCard(card)}
+                />
+              ))}
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
 
@@ -392,9 +246,7 @@ function KnowledgeCardItem({
 
   function handlePdfClick(e: React.MouseEvent) {
     e.stopPropagation();
-    if (driveLink) {
-      window.open(driveLink.url, "_blank", "noopener,noreferrer");
-    }
+    if (driveLink) window.open(driveLink.url, "_blank", "noopener,noreferrer");
   }
 
   return (
@@ -431,14 +283,16 @@ function KnowledgeCardItem({
 
         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-1">{card.summary}</p>
 
-        <div className="space-y-1.5">
-          {card.highlights.slice(0, 2).map((h, i) => (
-            <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground/80">
-              <span className="text-primary mt-0.5 shrink-0">—</span>
-              <span>{h}</span>
-            </div>
-          ))}
-        </div>
+        {card.highlights.length > 0 && (
+          <div className="space-y-1.5">
+            {card.highlights.slice(0, 2).map((h, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground/80">
+                <span className="text-primary mt-0.5 shrink-0">—</span>
+                <span>{h}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="pt-3 border-t border-border/40 flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
@@ -490,26 +344,13 @@ function KnowledgeDetailView({
   const [urlError, setUrlError] = useState(false);
 
   function handleSave() {
-    if (!isValidDriveUrl(linkInput)) {
-      setUrlError(true);
-      return;
-    }
+    if (!isValidDriveUrl(linkInput)) { setUrlError(true); return; }
     onSaveLink(linkInput.trim(), titleInput.trim() || card.title + " — PDF");
-    setLinkInput("");
-    setTitleInput("");
-    setShowLinkForm(false);
-    setUrlError(false);
+    setLinkInput(""); setTitleInput(""); setShowLinkForm(false); setUrlError(false);
   }
 
   function handleCancel() {
-    setLinkInput("");
-    setTitleInput("");
-    setShowLinkForm(false);
-    setUrlError(false);
-  }
-
-  function openPdf() {
-    if (driveLink) window.open(driveLink.url, "_blank", "noopener,noreferrer");
+    setLinkInput(""); setTitleInput(""); setShowLinkForm(false); setUrlError(false);
   }
 
   return (
@@ -521,7 +362,6 @@ function KnowledgeDetailView({
         onClick={onClose}
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
       />
-
       <motion.div
         initial={{ x: "100%", opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -530,7 +370,6 @@ function KnowledgeDetailView({
         className="fixed right-0 top-0 h-full w-full max-w-xl bg-background border-l border-border z-50 flex flex-col"
         data-testid="knowledge-detail-panel"
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-border/60 bg-card/50">
           <div className="flex items-center gap-3">
             <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center bg-muted", cat?.color)}>
@@ -550,9 +389,7 @@ function KnowledgeDetailView({
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
-          {/* Tags */}
           <div className="flex flex-wrap gap-2">
             {card.tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="bg-muted/60 text-muted-foreground font-normal gap-1">
@@ -566,302 +403,164 @@ function KnowledgeDetailView({
             </span>
           </div>
 
-          {/* Summary */}
           <p className="text-base text-muted-foreground leading-relaxed">{card.summary}</p>
 
-          {/* High-Yield Notes */}
-          <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold uppercase tracking-widest text-primary">High-Yield Notes</h3>
-            </div>
-            <div className="space-y-2">
-              {card.highlights.map((h, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + i * 0.06 }}
-                  className="flex items-start gap-3 rounded-xl bg-primary/5 border border-primary/10 px-4 py-3"
-                >
-                  <span className="text-primary font-bold text-sm mt-0.5 shrink-0">•</span>
-                  <p className="text-sm leading-relaxed">{h}</p>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-
-          {/* Key Points */}
-          <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Poin Kunci</h3>
-            </div>
-            <div className="space-y-2.5">
-              {card.keyPoints.map((point, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + i * 0.05 }}
-                  className="flex items-start gap-3"
-                >
-                  <span className="text-muted-foreground/50 text-xs font-mono mt-1 shrink-0 w-4">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{point}</p>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-
-          {/* Related Topics */}
-          <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Link2 className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Related Topics</h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {card.related.map((topic) => (
-                <motion.button
-                  key={topic}
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  className="text-sm px-3 py-1.5 rounded-full border border-border bg-muted/40 text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all"
-                >
-                  {topic}
-                </motion.button>
-              ))}
-            </div>
-          </section>
-
-          {/* Linked Notes */}
-          <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Catatan Terhubung</h3>
-            </div>
-            <div className="space-y-2">
-              {card.linkedNotes.map((note) => (
-                <div key={note} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted/30 border border-border/40 hover:border-border/70 cursor-pointer transition-all group">
-                  <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">{note}</span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 ml-auto group-hover:text-muted-foreground transition-all group-hover:translate-x-0.5" />
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Google Drive PDF Section */}
-          <section className="space-y-3">
-            <div className="flex items-center justify-between">
+          {card.highlights.length > 0 && (
+            <section className="space-y-3">
               <div className="flex items-center gap-2">
-                <HardDrive className="h-4 w-4 text-muted-foreground" />
-                <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Dokumen PDF</h3>
+                <Zap className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-semibold uppercase tracking-widest text-primary">High-Yield Notes</h3>
               </div>
-              {driveLink && !showLinkForm && (
-                <button
-                  onClick={() => setShowLinkForm(true)}
-                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                  data-testid="button-change-link"
-                >
-                  Ganti link
-                </button>
-              )}
+              <div className="space-y-2">
+                {card.highlights.map((h, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 + i * 0.06 }}
+                    className="flex items-start gap-3 rounded-xl bg-primary/5 border border-primary/10 px-4 py-3"
+                  >
+                    <span className="text-primary font-bold text-sm mt-0.5 shrink-0">•</span>
+                    <p className="text-sm leading-relaxed">{h}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {card.keyPoints.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Key Points</h3>
+              </div>
+              <div className="space-y-2">
+                {card.keyPoints.map((pt, i) => (
+                  <div key={i} className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
+                    <span className="text-xs text-muted-foreground/50 mt-0.5 tabular-nums shrink-0 w-4">{i + 1}.</span>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{pt}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {card.related.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Link2 className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Topik Terkait</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {card.related.map((r) => (
+                  <span key={r} className="px-3 py-1.5 rounded-full text-xs bg-muted/60 border border-border/60 text-muted-foreground hover:border-primary/40 hover:text-foreground transition-colors cursor-pointer">
+                    {r}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {card.linkedNotes.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Catatan Terhubung</h3>
+              </div>
+              <div className="space-y-2">
+                {card.linkedNotes.map((note) => (
+                  <div key={note} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors cursor-pointer group">
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+                    <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors flex-1">{note}</span>
+                    <ExternalLink className="h-3 w-3 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Drive PDF section */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2">
+              <HardDrive className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Google Drive PDF</h3>
             </div>
 
-            <AnimatePresence mode="wait">
-              {/* Linked state */}
-              {driveLink && !showLinkForm && (
-                <motion.div
-                  key="linked"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                  className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-3"
-                >
-                  <div className="flex items-start gap-3">
-                    {/* Drive icon */}
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-border/60 flex items-center justify-center shrink-0">
-                      <svg viewBox="0 0 87.3 78" className="h-5 w-5" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6.6 66.85L21.9 42.5H87.3L72.1 66.85Z" fill="#0066DA"/>
-                        <path d="M43.65 0L6.6 66.85H37.2L74.2 0Z" fill="#00AC47"/>
-                        <path d="M43.65 0L21.9 42.5H52.5L74.2 0Z" fill="#EA4335"/>
-                        <path d="M21.9 42.5L6.6 66.85H37.2L52.5 42.5Z" fill="#00832D"/>
-                        <path d="M52.5 42.5H21.9L37.2 66.85H72.1L52.5 42.5Z" fill="#2684FC"/>
-                        <path d="M74.2 0H43.65L52.5 42.5H87.3L74.2 0Z" fill="#FFBA00"/>
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-foreground truncate">{driveLink.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Google Drive · Ditambahkan {driveLink.addedAt}</p>
-                      <p className="text-xs text-muted-foreground/50 truncate mt-1">{driveLink.url}</p>
-                    </div>
+            {driveLink ? (
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium text-emerald-400">{driveLink.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Ditambahkan {driveLink.addedAt}</p>
                   </div>
-                  <div className="flex gap-2 pt-1">
-                    <Button
-                      size="sm"
-                      onClick={openPdf}
-                      className="flex-1 bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/20 gap-2 h-8"
-                      data-testid="button-open-drive-pdf"
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => window.open(driveLink.url, "_blank", "noopener,noreferrer")}
+                      className="flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+                      data-testid="button-open-pdf-detail"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
-                      Buka di Google Drive
-                    </Button>
+                      Buka
+                    </button>
                     <button
                       onClick={onRemoveLink}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg border border-border/50 text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-all"
-                      data-testid="button-remove-drive-link"
+                      className="flex items-center gap-1.5 text-xs text-destructive/60 hover:text-destructive transition-colors"
+                      data-testid="button-remove-pdf"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
+                      Hapus
                     </button>
                   </div>
-                </motion.div>
-              )}
-
-              {/* Empty / form state */}
-              {(!driveLink || showLinkForm) && (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {!showLinkForm ? (
-                    <div className="rounded-2xl border border-border/50 bg-muted/10 p-6 flex flex-col items-center gap-4 text-center">
-                      <div className="w-12 h-12 rounded-xl bg-muted/60 border border-border/40 flex items-center justify-center">
-                        <HardDrive className="h-5 w-5 text-muted-foreground/50" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Belum ada PDF terhubung</p>
-                        <p className="text-xs text-muted-foreground/50 mt-1">Tautkan file dari Google Drive</p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowLinkForm(true)}
-                        className="border-border hover:border-primary hover:text-primary gap-2"
-                        data-testid="button-attach-drive"
-                      >
-                        <Link2 className="h-3.5 w-3.5" />
-                        Tautkan Google Drive
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="rounded-2xl border border-border bg-card/60 p-5 space-y-4">
-                      <div className="flex items-center gap-2 mb-1">
-                        <svg viewBox="0 0 87.3 78" className="h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M6.6 66.85L21.9 42.5H87.3L72.1 66.85Z" fill="#0066DA"/>
-                          <path d="M43.65 0L6.6 66.85H37.2L74.2 0Z" fill="#00AC47"/>
-                          <path d="M43.65 0L21.9 42.5H52.5L74.2 0Z" fill="#EA4335"/>
-                          <path d="M21.9 42.5L6.6 66.85H37.2L52.5 42.5Z" fill="#00832D"/>
-                          <path d="M52.5 42.5H21.9L37.2 66.85H72.1L52.5 42.5Z" fill="#2684FC"/>
-                          <path d="M74.2 0H43.65L52.5 42.5H87.3L74.2 0Z" fill="#FFBA00"/>
-                        </svg>
-                        <p className="text-sm font-medium">Tautkan Google Drive PDF</p>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-xs text-muted-foreground mb-1.5 block">Nama file (opsional)</label>
-                          <input
-                            value={titleInput}
-                            onChange={(e) => setTitleInput(e.target.value)}
-                            placeholder={`${card.title} — PDF`}
-                            className="w-full bg-muted/40 border border-border/60 rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20 transition-all"
-                            data-testid="input-drive-title"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs text-muted-foreground mb-1.5 block">Link Google Drive</label>
-                          <input
-                            value={linkInput}
-                            onChange={(e) => { setLinkInput(e.target.value); setUrlError(false); }}
-                            placeholder="https://drive.google.com/file/d/..."
-                            className={cn(
-                              "w-full bg-muted/40 border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all",
-                              urlError
-                                ? "border-destructive/60 focus:ring-1 focus:ring-destructive/20"
-                                : "border-border/60 focus:border-primary/60 focus:ring-1 focus:ring-primary/20"
-                            )}
-                            data-testid="input-drive-url"
-                          />
-                          <AnimatePresence>
-                            {urlError && (
-                              <motion.p
-                                initial={{ opacity: 0, y: -4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0 }}
-                                className="flex items-center gap-1.5 text-xs text-destructive mt-1.5"
-                              >
-                                <AlertCircle className="h-3 w-3" />
-                                Masukkan link Google Drive yang valid
-                              </motion.p>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-muted-foreground/50 leading-relaxed">
-                        Pastikan file Google Drive dapat diakses. Buka Drive → klik kanan file → "Bagikan" → "Siapa saja yang memiliki link".
-                      </p>
-
-                      <div className="flex gap-2 pt-1">
-                        <Button
-                          size="sm"
-                          onClick={handleSave}
-                          disabled={!linkInput.trim()}
-                          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-9 disabled:opacity-30"
-                          data-testid="button-save-drive-link"
-                        >
-                          <Check className="h-3.5 w-3.5" />
-                          Simpan Tautan
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleCancel}
-                          className="text-muted-foreground hover:text-foreground h-9"
-                          data-testid="button-cancel-drive-link"
-                        >
-                          Batal
-                        </Button>
-                      </div>
-                    </div>
+                </div>
+              </div>
+            ) : showLinkForm ? (
+              <div className="rounded-xl border border-border/60 bg-card/50 p-4 space-y-3">
+                <input
+                  type="url"
+                  placeholder="https://drive.google.com/..."
+                  value={linkInput}
+                  onChange={(e) => { setLinkInput(e.target.value); setUrlError(false); }}
+                  className={cn(
+                    "w-full bg-muted/40 border rounded-lg px-3 py-2 text-sm outline-none transition-colors",
+                    urlError ? "border-destructive focus:border-destructive" : "border-border/60 focus:border-primary"
                   )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  data-testid="input-drive-url"
+                />
+                {urlError && (
+                  <p className="flex items-center gap-1.5 text-xs text-destructive">
+                    <AlertCircle className="h-3 w-3" />
+                    Masukkan URL Google Drive yang valid
+                  </p>
+                )}
+                <input
+                  type="text"
+                  placeholder="Nama PDF (opsional)"
+                  value={titleInput}
+                  onChange={(e) => setTitleInput(e.target.value)}
+                  className="w-full bg-muted/40 border border-border/60 rounded-lg px-3 py-2 text-sm outline-none focus:border-primary transition-colors"
+                  data-testid="input-drive-title"
+                />
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" onClick={handleSave} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90" data-testid="button-save-pdf">
+                    <Check className="h-3.5 w-3.5" />
+                    Simpan Link
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={handleCancel} className="text-muted-foreground" data-testid="button-cancel-pdf">
+                    Batal
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowLinkForm(true)}
+                className="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-border/60 py-4 text-sm text-muted-foreground hover:border-primary/40 hover:text-primary transition-all"
+                data-testid="button-add-pdf"
+              >
+                <HardDrive className="h-4 w-4" />
+                Tautkan Google Drive PDF
+              </button>
+            )}
           </section>
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-border/60 bg-card/30 flex gap-3">
-          {driveLink ? (
-            <Button
-              onClick={openPdf}
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 shadow-[0_0_12px_rgba(249,168,37,0.2)]"
-              data-testid="button-open-pdf-detail"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Buka PDF
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              onClick={() => setShowLinkForm(true)}
-              className="flex-1 border-border hover:border-primary hover:text-primary gap-2"
-              data-testid="button-attach-drive-footer"
-            >
-              <HardDrive className="h-4 w-4" />
-              Tautkan Google Drive
-            </Button>
-          )}
-          <Button variant="outline" onClick={onClose} className="border-border hover:border-border/80">
-            Tutup
-          </Button>
         </div>
       </motion.div>
     </>

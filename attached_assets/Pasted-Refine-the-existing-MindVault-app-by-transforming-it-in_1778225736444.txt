@@ -1,0 +1,137 @@
+Refine the existing MindVault app by transforming it into a clean personal workspace with proper empty states.
+
+IMPORTANT:
+- Do NOT rebuild the app.
+- Keep all existing functionality.
+- Maintain the dark cinematic aesthetic.
+- Preserve PARA terminology in English.
+- Keep the interface mostly in Indonesian.
+
+==================================================
+GOAL
+==================================================
+
+MindVault should feel like a real personal second-brain system that starts clean and grows with the user over time.
+
+Currently the app contains too many example/demo contents.
+
+Transform the app into a cleaner and more realistic personal workspace.
+
+==================================================
+REMOVE DEMO CONTENT
+==================================================
+
+Remove all unnecessary dummy/example content such as:
+- fake medical knowledge cards
+- fake projects
+- fake inbox items
+- fake tasks
+- fake notes
+- fake timelines
+
+The app should no longer feel like a template demo.
+
+==================================================
+KEEP THE STRUCTURE
+==================================================
+
+Keep:
+- Dashboard
+- Inbox
+- Projects
+- Resources
+- Archive
+- Search system
+- Voice Capture
+- Knowledge system
+- Google Drive linking
+- Existing UI and navigation
+
+==================================================
+EMPTY STATES
+==================================================
+
+Create elegant empty states for sections that have no content yet.
+
+Examples:
+
+Resources:
+"Belum ada Knowledge Card."
+"Tambahkan pengetahuan pertamamu."
+
+Projects:
+"Belum ada project aktif."
+
+Inbox:
+"Belum ada capture."
+"Gunakan Quick Capture untuk menyimpan ide."
+
+Archive:
+"Belum ada arsip."
+
+==================================================
+EMPTY STATE DESIGN
+==================================================
+
+Empty states should feel:
+- premium
+- calming
+- minimal
+- cinematic
+- modern
+
+Use:
+- subtle icons
+- elegant spacing
+- soft glow accents
+- lightweight illustrations if appropriate
+
+==================================================
+DASHBOARD CLEANUP
+==================================================
+
+Clean the dashboard experience.
+
+Keep:
+- search bar
+- quick capture
+- recent activity sections
+
+But remove fake/demo activities.
+
+==================================================
+FIRST-TIME EXPERIENCE
+==================================================
+
+Make the app feel welcoming for a first-time personal user.
+
+The experience should feel:
+- clean
+- intentional
+- inspiring
+- distraction-free
+
+==================================================
+PERFORMANCE
+==================================================
+
+Keep the app:
+- lightweight
+- responsive
+- smooth
+
+==================================================
+IMPORTANT
+==================================================
+
+Do NOT:
+- redesign the entire app
+- remove existing systems
+- add backend
+- add authentication
+- add AI chatbot
+
+Only:
+- remove demo content
+- create proper empty states
+- improve first-time personal workspace experience

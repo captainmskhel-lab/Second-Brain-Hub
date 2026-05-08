@@ -19,14 +19,7 @@ interface InboxContextValue {
 const InboxContext = createContext<InboxContextValue | null>(null);
 
 const STORAGE_KEY = "mindvault_inbox";
-
-const defaultItems: InboxItem[] = [
-  { id: "d1", text: "ide random untuk sidang", type: "Idea", time: "2 jam lalu", timestamp: Date.now() - 2 * 60 * 60 * 1000 },
-  { id: "d2", text: "voice notes kuliah dr. Budi", type: "Voice Capture", time: "kemarin", timestamp: Date.now() - 24 * 60 * 60 * 1000 },
-  { id: "d3", text: "insight dosen tentang farmakologi", type: "Quick Note", time: "2 hari lalu", timestamp: Date.now() - 48 * 60 * 60 * 1000 },
-  { id: "d4", text: "refleksi minggu pertama koas", type: "Reflection", time: "3 hari lalu", timestamp: Date.now() - 72 * 60 * 60 * 1000 },
-  { id: "d5", text: "link artikel: burnout prevention", type: "Quick Note", time: "4 hari lalu", timestamp: Date.now() - 96 * 60 * 60 * 1000 },
-];
+const DEMO_IDS = new Set(["d1", "d2", "d3", "d4", "d5"]);
 
 function formatRelativeTime(timestamp: number): string {
   const diff = Date.now() - timestamp;
@@ -44,9 +37,12 @@ export function InboxProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<InboxItem[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : defaultItems;
+      if (!stored) return [];
+      const parsed: InboxItem[] = JSON.parse(stored);
+      // Strip any seeded demo items from previous sessions
+      return parsed.filter((item) => !DEMO_IDS.has(item.id));
     } catch {
-      return defaultItems;
+      return [];
     }
   });
 

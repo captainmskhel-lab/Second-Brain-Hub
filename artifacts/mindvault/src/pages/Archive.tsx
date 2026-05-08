@@ -17,14 +17,8 @@ const typeConfig = {
   sumber: { icon: Library, color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", label: "Resource" },
 } as const;
 
-const defaultItems: ArchiveItem[] = [
-  { id: "a1", title: "Catatan lama 1", time: "2 bulan lalu", type: "catatan" },
-  { id: "a2", title: "Ujian Blok 12", time: "1 bulan lalu", type: "proyek" },
-  { id: "a3", title: "Anatomi Dasar", time: "3 minggu lalu", type: "sumber" },
-];
-
 export default function ArchivePage() {
-  const [items, setItems] = useLocalStorage<ArchiveItem[]>("mindvault_archive", defaultItems);
+  const [items, setItems] = useLocalStorage<ArchiveItem[]>("mindvault_archive", []);
 
   function restore(id: string) {
     setItems((prev) => prev.filter((i) => i.id !== id));
@@ -37,7 +31,6 @@ export default function ArchivePage() {
       transition={{ duration: 0.4 }}
       className="p-6 md:p-10 max-w-4xl mx-auto space-y-8"
     >
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Archive</h1>
@@ -53,15 +46,20 @@ export default function ArchivePage() {
       {/* Empty state */}
       {items.length === 0 && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col items-center justify-center py-24 space-y-3 text-center"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="flex flex-col items-center justify-center py-24 space-y-4 text-center"
         >
-          <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
-            <Archive className="w-6 h-6 text-muted-foreground" />
+          <div className="w-16 h-16 rounded-2xl bg-muted/60 border border-border/40 flex items-center justify-center">
+            <Archive className="w-7 h-7 text-muted-foreground/50" />
           </div>
-          <p className="text-muted-foreground">Archive kosong</p>
-          <p className="text-sm text-muted-foreground/60">Item yang diarsipkan akan muncul di sini.</p>
+          <div className="space-y-1.5">
+            <p className="text-base font-medium text-muted-foreground">Belum ada arsip</p>
+            <p className="text-sm text-muted-foreground/60 max-w-xs leading-relaxed">
+              Item yang kamu arsipkan dari Inbox atau Projects akan muncul di sini.
+            </p>
+          </div>
         </motion.div>
       )}
 
@@ -81,25 +79,18 @@ export default function ArchivePage() {
                 className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-card/60 backdrop-blur-sm px-5 py-4 hover:border-border hover:bg-card/80 transition-all"
                 data-testid={`card-archive-${item.id}`}
               >
-                <div
-                  className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${config.bg} ${config.color}`}
-                >
+                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${config.bg} ${config.color}`}>
                   <Icon className="w-4 h-4" />
                 </div>
-
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-medium text-foreground/80 truncate">{item.title}</h3>
-                    <Badge
-                      variant="outline"
-                      className={`${config.bg} ${config.color} border text-xs font-normal shrink-0`}
-                    >
+                    <Badge variant="outline" className={`${config.bg} ${config.color} border text-xs font-normal shrink-0`}>
                       {config.label}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">Diarsipkan {item.time}</p>
                 </div>
-
                 <Button
                   variant="outline"
                   size="sm"
